@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atualizar Time &middot; CS Ops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --purple:#7668AC;
+  --purple-soft:#F0EEF8;
+  --purple-dark:#5a4f8a;
+  --yellow:#F9DC45;
+  --yellow-soft:#FFFBE6;
+  --blue:#008ECF;
+  --blue-soft:#E6F4FB;
+  --ok:#1A9957;
+  --ok-bg:#E6F5EE;
+  --bad:#C0392B;
+  --bad-bg:#FDECEB;
+  --bg:#f7f7f5;
+  --card:#fff;
+  --border:#E0E6ED;
+  --t1:#1D1C1D;
+  --t2:#595959;
+  --t3:#9BA8B5;
+  --r:14px;
+  --sh:0 2px 12px rgba(118,104,172,.12)
+}
+
+body{
+  font-family:'Montserrat',sans-serif;
+  background:var(--purple);
+  color:var(--t1);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:40px 20px 60px;
+  position:relative;
+  overflow-x:hidden;
+}
+
+/* background decorations */
+.bg-deco{position:fixed;pointer-events:none;z-index:0;opacity:.1}
+.bg-deco.tl{top:-30px;left:-20px;width:180px;transform:rotate(-15deg)}
+.bg-deco.br{bottom:-10px;right:-10px;width:140px;transform:rotate(20deg)}
+.bg-deco.tr{top:20px;right:30px;width:100px}
+
+.page{position:relative;z-index:1;width:100%;max-width:560px}
+
+/* header */
+.brand-name{text-align:center;font-size:26px;font-weight:900;color:#fff;letter-spacing:-.5px;margin-bottom:2px}
+.brand-name span{color:var(--yellow)}
+.tagline{text-align:center;font-size:10px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:28px}
+
+/* card */
+.card{
+  background:var(--card);
+  border-radius:20px;
+  padding:32px 28px 36px;
+  box-shadow:0 12px 40px rgba(0,0,0,.22);
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:5px;
+  background:var(--yellow);
+  border-radius:20px 20px 0 0;
+}
+
+.card-title{
+  font-size:18px;
+  font-weight:900;
+  color:var(--purple);
+  margin-bottom:4px;
+}
+.card-sub{
+  font-size:12px;
+  color:var(--t3);
+  font-weight:600;
+  margin-bottom:24px;
+  line-height:1.5;
+}
+
+/* form */
+.form-group{margin-bottom:18px}
+label{
+  display:block;
+  font-size:11px;
+  font-weight:800;
+  color:var(--t2);
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  margin-bottom:6px;
+}
+label .required{color:var(--bad);margin-left:2px}
+
+input[type=text],
+select,
+textarea{
+  width:100%;
+  padding:11px 14px;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  font-family:'Montserrat',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  color:var(--t1);
+  background:var(--card);
+  transition:border-color .15s,box-shadow .15s;
+  outline:none;
+  appearance:none;
+  -webkit-appearance:none;
+}
+input[type=text]:focus,
+select:focus,
+textarea:focus{
+  border-color:var(--purple);
+  box-shadow:0 0 0 3px rgba(118,104,172,.15);
+}
+select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239BA8B5' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  padding-right:36px;
+  cursor:pointer;
+}
+textarea{resize:vertical;min-height:80px}
+
+/* tipo de mudanca pill grid */
+.tipo-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.tipo-pill{
+  position:relative;
+}
+.tipo-pill input[type=radio]{
+  position:absolute;
+  opacity:0;
+  width:0;height:0;
+}
+.tipo-pill label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:11px 14px;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:700;
+  color:var(--t2);
+  text-transform:none;
+  letter-spacing:0;
+  transition:all .15s;
+  user-select:none;
+}
+.tipo-pill label:hover{border-color:var(--purple);color:var(--purple)}
+.tipo-pill input:checked + label{
+  background:var(--purple-soft);
+  border-color:var(--purple);
+  color:var(--purple);
+}
+.tipo-pill .pill-icon{font-size:16px;flex-shrink:0}
+
+/* campos condicionais */
+.conditional{display:none}
+.conditional.visible{display:block}
+
+/* divider */
+.divider{
+  height:1px;
+  background:var(--border);
+  margin:22px 0;
+}
+
+/* submit button */
+.btn-submit{
+  width:100%;
+  padding:15px;
+  background:var(--purple);
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  font-family:'Montserrat',sans-serif;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+  transition:background .15s,transform .1s;
+  box-shadow:0 4px 16px rgba(118,104,172,.4);
+  letter-spacing:.3px;
+  margin-top:6px;
+}
+.btn-submit:hover{background:var(--purple-dark);transform:translateY(-1px)}
+.btn-submit:active{transform:translateY(0)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+/* success state */
+.success-box{
+  display:none;
+  text-align:center;
+  padding:40px 20px;
+}
+.success-box.visible{display:block}
+.success-icon{
+  font-size:56px;
+  margin-bottom:16px;
+}
+.success-title{
+  font-size:20px;
+  font-weight:900;
+  color:var(--purple);
+  margin-bottom:8px;
+}
+.success-sub{
+  font-size:13px;
+  color:var(--t2);
+  font-weight:600;
+  line-height:1.6;
+  margin-bottom:24px;
+}
+.btn-new{
+  display:inline-block;
+  padding:11px 28px;
+  background:var(--purple);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  font-family:'Montserrat',sans-serif;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  text-decoration:none;
+  transition:background .15s;
+}
+.btn-new:hover{background:var(--purple-dark)}
+
+/* error */
+.field-error{
+  font-size:11px;
+  color:var(--bad);
+  font-weight:700;
+  margin-top:5px;
+  display:none;
+}
+input.invalid,select.invalid{border-color:var(--bad)}
+
+/* spinner */
+.spinner{
+  display:inline-block;
+  width:16px;height:16px;
+  border:2px solid rgba(255,255,255,.4);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .6s linear infinite;
+  vertical-align:middle;
+  margin-right:8px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* summary */
+.summary-box{
+  background:var(--purple-soft);
+  border:1.5px solid rgba(118,104,172,.25);
+  border-radius:12px;
+  padding:16px 18px;
+  margin-bottom:20px;
+  font-size:13px;
+  color:var(--t2);
+  font-weight:600;
+  line-height:1.7;
+  display:none;
+}
+.summary-box.visible{display:block}
+.summary-box strong{color:var(--purple)}
+
+/* back link */
+.back-link{
+  display:block;
+  text-align:center;
+  margin-top:20px;
+  font-size:12px;
+  font-weight:700;
+  color:rgba(255,255,255,.65);
+  text-decoration:none;
+  transition:color .15s;
+}
+.back-link:hover{color:#fff}
+
+@media(max-width:480px){
+  .tipo-grid{grid-template-columns:1fr}
+  .card{padding:24px 18px 28px}
+  body{padding:28px 14px 48px}
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="brand-name">Estante <span>M&aacute;gica</span></div>
+  <div class="tagline">CS Ops &nbsp;&middot;&nbsp; Atualizar Time</div>
+
+  <div class="card">
+    <!-- FORMULARIO -->
+    <div id="form-wrapper">
+      <div class="card-title">Registrar mudan&ccedil;a no time</div>
+      <div class="card-sub">Registre entradas, sa&iacute;das e movimenta&ccedil;&otilde;es. Os dados v&atilde;o direto para a planilha de controle.</div>
+
+      <form id="main-form" novalidate>
+
+        <!-- TIPO DE MUDANCA -->
+        <div class="form-group">
+          <label>Tipo de mudan&ccedil;a <span class="required">*</span></label>
+          <div class="tipo-grid">
+            <div class="tipo-pill">
+              <input type="radio" name="tipo" id="tipo-entrada" value="Entrada">
+              <label for="tipo-entrada">
+                <span class="pill-icon">&#128464;</span> Entrada
+              </label>
+            </div>
+            <div class="tipo-pill">
+              <input type="radio" name="tipo" id="tipo-saida" value="Sa&iacute;da">
+              <label for="tipo-saida">
+                <span class="pill-icon">&#128682;</span> Sa&iacute;da
+              </label>
+            </div>
+            <div class="tipo-pill">
+              <input type="radio" name="tipo" id="tipo-segmento" value="Troca de Segmento">
+              <label for="tipo-segmento">
+                <span class="pill-icon">&#128257;</span> Troca de Segmento
+              </label>
+            </div>
+            <div class="tipo-pill">
+              <input type="radio" name="tipo" id="tipo-cargo" value="Troca de Cargo">
+              <label for="tipo-cargo">
+                <span class="pill-icon">&#127959;</span> Troca de Cargo
+              </label>
+            </div>
+          </div>
+          <div class="field-error" id="err-tipo">Selecione o tipo de mudan&ccedil;a.</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- NOME -->
+        <div class="form-group">
+          <label for="nome">Nome completo do consultor <span class="required">*</span></label>
+          <input type="text" id="nome" name="nome" placeholder="Ex: Ana Clara Peres dos Santos" autocomplete="off">
+          <div class="field-error" id="err-nome">Informe o nome do consultor.</div>
+        </div>
+
+        <!-- SEGMENTO -->
+        <div class="form-group" id="group-segmento">
+          <label for="segmento">Segmento <span class="required" id="req-segmento">*</span></label>
+          <select id="segmento" name="segmento">
+            <option value="">Selecione o segmento&hellip;</option>
+            <option>High touch - Novas</option>
+            <option>High touch - Renova&ccedil;&atilde;o</option>
+            <option>Medium touch - Renova&ccedil;&atilde;o</option>
+            <option>Premium touch</option>
+            <option>Premium touch 40+</option>
+            <option>M&eacute;xico</option>
+            <option>Squad Reagendamento</option>
+            <option>Squad Confirma&ccedil;&atilde;o</option>
+            <option>Backup</option>
+            <option>Redes</option>
+            <option>SEDUC</option>
+          </select>
+          <div class="field-error" id="err-segmento">Selecione o segmento.</div>
+        </div>
+
+        <!-- SEGMENTO ANTERIOR (troca de segmento) -->
+        <div class="form-group conditional" id="group-segmento-anterior">
+          <label for="segmento-anterior">Segmento anterior</label>
+          <select id="segmento-anterior" name="segmento_anterior">
+            <option value="">Selecione o segmento anterior&hellip;</option>
+            <option>High touch - Novas</option>
+            <option>High touch - Renova&ccedil;&atilde;o</option>
+            <option>Medium touch - Renova&ccedil;&atilde;o</option>
+            <option>Premium touch</option>
+            <option>Premium touch 40+</option>
+            <option>M&eacute;xico</option>
+            <option>Squad Reagendamento</option>
+            <option>Squad Confirma&ccedil;&atilde;o</option>
+            <option>Backup</option>
+            <option>Redes</option>
+            <option>SEDUC</option>
+          </select>
+        </div>
+
+        <!-- CARGO -->
+        <div class="form-group" id="group-cargo">
+          <label for="cargo">Cargo <span class="required" id="req-cargo">*</span></label>
+          <select id="cargo" name="cargo">
+            <option value="">Selecione o cargo&hellip;</option>
+            <option>Analista</option>
+            <option>Estagi&aacute;rio</option>
+            <option>Supervisor</option>
+            <option>Coordena&ccedil;&atilde;o</option>
+          </select>
+          <div class="field-error" id="err-cargo">Selecione o cargo.</div>
+        </div>
+
+        <!-- CARGO ANTERIOR (troca de cargo) -->
+        <div class="form-group conditional" id="group-cargo-anterior">
+          <label for="cargo-anterior">Cargo anterior</label>
+          <select id="cargo-anterior" name="cargo_anterior">
+            <option value="">Selecione o cargo anterior&hellip;</option>
+            <option>Analista</option>
+            <option>Estagi&aacute;rio</option>
+            <option>Supervisor</option>
+            <option>Coordena&ccedil;&atilde;o</option>
+          </select>
+        </div>
+
+        <!-- LIDERANCA -->
+        <div class="form-group" id="group-lideranca">
+          <label for="lideranca">Lideran&ccedil;a direta <span class="required" id="req-lideranca">*</span></label>
+          <select id="lideranca" name="lideranca">
+            <option value="">Selecione a lideran&ccedil;a&hellip;</option>
+            <option>Mahane</option>
+            <option>Julia Alves</option>
+            <option>Julia Loubach</option>
+            <option>Larissa Garcia</option>
+            <option>Carine Leite</option>
+            <option>Sara Penteado</option>
+            <option>Moreno Loss</option>
+            <option>Paula Valero</option>
+          </select>
+          <div class="field-error" id="err-lideranca">Selecione a lideran&ccedil;a.</div>
+        </div>
+
+        <!-- DATA EFETIVA -->
+        <div class="form-group">
+          <label for="data-mudanca">Data da mudan&ccedil;a <span class="required">*</span></label>
+          <input type="text" id="data-mudanca" name="data_mudanca" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric">
+          <div class="field-error" id="err-data">Informe uma data v&aacute;lida (DD/MM/AAAA).</div>
+        </div>
+
+        <!-- OBSERVACAO -->
+        <div class="form-group">
+          <label for="obs">Observa&ccedil;&atilde;o <span style="color:var(--t3);font-weight:600;text-transform:none;letter-spacing:0">(opcional)</span></label>
+          <textarea id="obs" name="observacao" placeholder="Detalhe o motivo, contexto ou qualquer informa&ccedil;&atilde;o relevante&hellip;"></textarea>
+        </div>
+
+        <!-- RESUMO ANTES DE ENVIAR -->
+        <div class="summary-box" id="summary-box"></div>
+
+        <button type="submit" class="btn-submit" id="btn-submit">Registrar mudan&ccedil;a</button>
+
+      </form>
+    </div>
+
+    <!-- SUCESSO -->
+    <div class="success-box" id="success-box">
+      <div class="success-icon">&#10003;</div>
+      <div class="success-title">Registrado com sucesso!</div>
+      <div class="success-sub" id="success-detail">A mudan&ccedil;a foi salva na planilha de controle.</div>
+      <button class="btn-new" onclick="resetForm()">Registrar outra mudan&ccedil;a</button>
+    </div>
+  </div>
+
+  <a href="https://biancamoura-ctrl.github.io/dashboards-efetividade/" class="back-link">&#8592; Voltar para os dashboards</a>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+// Substitua pela URL do seu Google Apps Script Web App depois de publicar.
+var APPS_SCRIPT_URL = "COLE_AQUI_A_URL_DO_APPS_SCRIPT";
+
+// ── ESTADO ──────────────────────────────────────────────────────────────────
+var tipoSelecionado = null;
+
+// ── TIPO PILLS ───────────────────────────────────────────────────────────────
+document.querySelectorAll('input[name="tipo"]').forEach(function(radio) {
+  radio.addEventListener('change', function() {
+    tipoSelecionado = this.value;
+    atualizarCamposCondicionais();
+    atualizarResumo();
+    document.getElementById('err-tipo').style.display = 'none';
+  });
+});
+
+function atualizarCamposCondicionais() {
+  var t = tipoSelecionado;
+
+  // segmento anterior: visivel apenas em troca de segmento
+  toggleConditional('group-segmento-anterior', t === 'Troca de Segmento');
+
+  // cargo anterior: visivel apenas em troca de cargo
+  toggleConditional('group-cargo-anterior', t === 'Troca de Cargo');
+
+  // em saida: segmento e cargo ficam opcionais
+  var reqSegmento = document.getElementById('req-segmento');
+  var reqCargo    = document.getElementById('req-cargo');
+  var reqLideranca = document.getElementById('req-lideranca');
+  if (t === 'Saída') {
+    reqSegmento.style.display  = 'none';
+    reqCargo.style.display     = 'none';
+    reqLideranca.style.display = 'none';
+  } else {
+    reqSegmento.style.display  = '';
+    reqCargo.style.display     = '';
+    reqLideranca.style.display = '';
+  }
+}
+
+function toggleConditional(id, show) {
+  var el = document.getElementById(id);
+  if (show) {
+    el.classList.add('visible');
+  } else {
+    el.classList.remove('visible');
+    // limpa os selects condicionais
+    var selects = el.querySelectorAll('select');
+    selects.forEach(function(s){ s.value = ''; });
+  }
+}
+
+// ── MASCARA DE DATA ──────────────────────────────────────────────────────────
+document.getElementById('data-mudanca').addEventListener('input', function(e) {
+  var v = e.target.value.replace(/\D/g, '');
+  if (v.length >= 3) v = v.substring(0,2) + '/' + v.substring(2);
+  if (v.length >= 6) v = v.substring(0,5) + '/' + v.substring(5,9);
+  e.target.value = v;
+  atualizarResumo();
+});
+
+// ── RESUMO ───────────────────────────────────────────────────────────────────
+['nome','segmento','cargo','lideranca','data-mudanca'].forEach(function(id) {
+  var el = document.getElementById(id);
+  if (el) el.addEventListener('change', atualizarResumo);
+  if (el) el.addEventListener('input', atualizarResumo);
+});
+
+function atualizarResumo() {
+  var box  = document.getElementById('summary-box');
+  var tipo = tipoSelecionado;
+  var nome = document.getElementById('nome').value.trim();
+  if (!tipo || !nome) { box.classList.remove('visible'); return; }
+
+  var segmento  = document.getElementById('segmento').value;
+  var cargo     = document.getElementById('cargo').value;
+  var lideranca = document.getElementById('lideranca').value;
+  var data      = document.getElementById('data-mudanca').value;
+
+  var partes = [];
+  partes.push('<strong>' + tipo + '</strong> de <strong>' + esc(nome) + '</strong>');
+  if (segmento)  partes.push('Segmento: <strong>' + esc(segmento) + '</strong>');
+  if (cargo)     partes.push('Cargo: <strong>' + esc(cargo) + '</strong>');
+  if (lideranca) partes.push('Lideran&ccedil;a: <strong>' + esc(lideranca) + '</strong>');
+  if (data)      partes.push('Data: <strong>' + esc(data) + '</strong>');
+
+  box.innerHTML = partes.join(' &nbsp;&middot;&nbsp; ');
+  box.classList.add('visible');
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ── VALIDACAO ────────────────────────────────────────────────────────────────
+function validar() {
+  var ok = true;
+
+  // tipo
+  if (!tipoSelecionado) {
+    document.getElementById('err-tipo').style.display = 'block';
+    ok = false;
+  }
+
+  // nome
+  var nome = document.getElementById('nome');
+  if (!nome.value.trim()) {
+    nome.classList.add('invalid');
+    document.getElementById('err-nome').style.display = 'block';
+    ok = false;
+  } else {
+    nome.classList.remove('invalid');
+    document.getElementById('err-nome').style.display = 'none';
+  }
+
+  // segmento (obrigatorio exceto saida)
+  var segmento = document.getElementById('segmento');
+  if (tipoSelecionado !== 'Saída' && !segmento.value) {
+    segmento.classList.add('invalid');
+    document.getElementById('err-segmento').style.display = 'block';
+    ok = false;
+  } else {
+    segmento.classList.remove('invalid');
+    document.getElementById('err-segmento').style.display = 'none';
+  }
+
+  // cargo (obrigatorio exceto saida)
+  var cargo = document.getElementById('cargo');
+  if (tipoSelecionado !== 'Saída' && !cargo.value) {
+    cargo.classList.add('invalid');
+    document.getElementById('err-cargo').style.display = 'block';
+    ok = false;
+  } else {
+    cargo.classList.remove('invalid');
+    document.getElementById('err-cargo').style.display = 'none';
+  }
+
+  // lideranca (obrigatorio exceto saida)
+  var lideranca = document.getElementById('lideranca');
+  if (tipoSelecionado !== 'Saída' && !lideranca.value) {
+    lideranca.classList.add('invalid');
+    document.getElementById('err-lideranca').style.display = 'block';
+    ok = false;
+  } else {
+    lideranca.classList.remove('invalid');
+    document.getElementById('err-lideranca').style.display = 'none';
+  }
+
+  // data
+  var data = document.getElementById('data-mudanca');
+  var dataOk = /^\d{2}\/\d{2}\/\d{4}$/.test(data.value.trim());
+  if (!data.value.trim() || !dataOk) {
+    data.classList.add('invalid');
+    document.getElementById('err-data').style.display = 'block';
+    ok = false;
+  } else {
+    data.classList.remove('invalid');
+    document.getElementById('err-data').style.display = 'none';
+  }
+
+  return ok;
+}
+
+// ── SUBMIT ───────────────────────────────────────────────────────────────────
+document.getElementById('main-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (!validar()) return;
+
+  var btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Enviando&hellip;';
+
+  var payload = {
+    tipo:              tipoSelecionado,
+    nome:              document.getElementById('nome').value.trim(),
+    segmento:          document.getElementById('segmento').value,
+    segmento_anterior: document.getElementById('segmento-anterior') ? document.getElementById('segmento-anterior').value : '',
+    cargo:             document.getElementById('cargo').value,
+    cargo_anterior:    document.getElementById('cargo-anterior') ? document.getElementById('cargo-anterior').value : '',
+    lideranca:         document.getElementById('lideranca').value,
+    data_mudanca:      document.getElementById('data-mudanca').value.trim(),
+    observacao:        document.getElementById('obs').value.trim(),
+    enviado_por:       navigator.userAgent,
+    timestamp:         new Date().toISOString()
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode:   'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  })
+  .then(function() {
+    // no-cors sempre retorna opaque — tratamos como sucesso
+    mostrarSucesso(payload);
+  })
+  .catch(function(err) {
+    btn.disabled = false;
+    btn.innerHTML = 'Registrar mudan&ccedil;a';
+    alert('Erro ao enviar. Verifique sua conex&atilde;o e tente novamente.\n\n' + err);
+  });
+});
+
+function mostrarSucesso(payload) {
+  document.getElementById('form-wrapper').style.display = 'none';
+  var box    = document.getElementById('success-box');
+  var detail = document.getElementById('success-detail');
+  detail.innerHTML =
+    '<strong>' + esc(payload.tipo) + '</strong> de <strong>' + esc(payload.nome) + '</strong>' +
+    (payload.segmento ? ' &mdash; ' + esc(payload.segmento) : '') +
+    ' registrado em ' + esc(payload.data_mudanca) + '.';
+  box.classList.add('visible');
+}
+
+function resetForm() {
+  document.getElementById('form-wrapper').style.display = '';
+  document.getElementById('success-box').classList.remove('visible');
+  document.getElementById('main-form').reset();
+  tipoSelecionado = null;
+  document.getElementById('summary-box').classList.remove('visible');
+  document.getElementById('group-segmento-anterior').classList.remove('visible');
+  document.getElementById('group-cargo-anterior').classList.remove('visible');
+  document.getElementById('btn-submit').disabled = false;
+  document.getElementById('btn-submit').innerHTML = 'Registrar mudan&ccedil;a';
+  // limpa erros
+  document.querySelectorAll('.field-error').forEach(function(el){ el.style.display='none'; });
+  document.querySelectorAll('.invalid').forEach(function(el){ el.classList.remove('invalid'); });
+}
+</script>
+</body>
+</html>
