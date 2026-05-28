@@ -283,6 +283,161 @@ input.invalid,select.invalid{border-color:var(--bad)}
 }
 .back-link:hover{color:#fff}
 
+/* btn ver time */
+.btn-ver-time{
+  display:block;
+  width:100%;
+  padding:12px;
+  background:transparent;
+  color:var(--purple);
+  border:1.5px solid var(--purple);
+  border-radius:12px;
+  font-family:'Montserrat',sans-serif;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  transition:background .15s,color .15s;
+  letter-spacing:.3px;
+  margin-top:14px;
+}
+.btn-ver-time:hover{background:var(--purple-soft)}
+
+/* modal overlay */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  z-index:1000;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:32px 16px 32px;
+  overflow-y:auto;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s;
+}
+.modal-overlay.open{
+  opacity:1;
+  pointer-events:all;
+}
+.modal{
+  background:#fff;
+  border-radius:20px;
+  width:100%;
+  max-width:660px;
+  box-shadow:0 24px 64px rgba(0,0,0,.3);
+  overflow:hidden;
+  transform:translateY(16px);
+  transition:transform .2s;
+  flex-shrink:0;
+  margin:auto;
+}
+.modal-overlay.open .modal{transform:translateY(0)}
+
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:22px 24px 18px;
+  border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  background:#fff;
+  z-index:2;
+}
+.modal-title{
+  font-size:16px;
+  font-weight:900;
+  color:var(--purple);
+}
+.modal-meta{
+  font-size:11px;
+  color:var(--t3);
+  font-weight:600;
+  margin-top:2px;
+}
+.modal-close{
+  background:none;
+  border:none;
+  font-size:22px;
+  color:var(--t3);
+  cursor:pointer;
+  line-height:1;
+  padding:4px 6px;
+  border-radius:6px;
+  transition:background .15s,color .15s;
+}
+.modal-close:hover{background:var(--purple-soft);color:var(--purple)}
+
+.modal-body{padding:20px 24px 28px}
+
+/* segmento block */
+.seg-block{margin-bottom:22px}
+.seg-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.seg-name{
+  font-size:13px;
+  font-weight:900;
+  color:var(--purple);
+  text-transform:uppercase;
+  letter-spacing:.6px;
+}
+.seg-badge{
+  font-size:10px;
+  font-weight:800;
+  background:var(--purple-soft);
+  color:var(--purple);
+  border-radius:20px;
+  padding:2px 8px;
+}
+
+.seg-cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:8px;
+}
+.pessoa-card{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px 12px;
+}
+.pessoa-nome{
+  font-size:12px;
+  font-weight:800;
+  color:var(--t1);
+  line-height:1.3;
+  margin-bottom:4px;
+}
+.pessoa-meta{
+  font-size:10px;
+  color:var(--t3);
+  font-weight:600;
+  line-height:1.4;
+}
+.pessoa-meta .cargo-badge{
+  display:inline-block;
+  padding:1px 6px;
+  border-radius:8px;
+  font-size:9px;
+  font-weight:800;
+  margin-bottom:3px;
+}
+.cargo-Analista{background:#E6F4FB;color:var(--blue)}
+.cargo-Estagiário{background:var(--yellow-soft);color:#a07800}
+.cargo-Supervisor{background:#E6F5EE;color:var(--ok)}
+.cargo-Coordenação{background:var(--purple-soft);color:var(--purple)}
+
+@media(max-width:480px){
+  .seg-cards{grid-template-columns:1fr 1fr}
+  .modal-header,.modal-body{padding-left:16px;padding-right:16px}
+}
+
 @media(max-width:480px){
   .tipo-grid{grid-template-columns:1fr}
   .card{padding:24px 18px 28px}
@@ -447,6 +602,9 @@ input.invalid,select.invalid{border-color:var(--bad)}
       </form>
     </div>
 
+    <!-- VER TIME ATUAL -->
+    <button class="btn-ver-time" id="btn-ver-time" onclick="abrirModalTime()">Ver time atual (41 pessoas)</button>
+
     <!-- SUCESSO -->
     <div class="success-box" id="success-box">
       <div class="success-icon">&#10003;</div>
@@ -459,7 +617,166 @@ input.invalid,select.invalid{border-color:var(--bad)}
   <a href="https://biancamoura-ctrl.github.io/dashboards-efetividade/" class="back-link">&#8592; Voltar para os dashboards</a>
 </div>
 
+<!-- MODAL TIME ATUAL -->
+<div class="modal-overlay" id="modal-time" role="dialog" aria-modal="true" aria-label="Time atual">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Time de Sucesso</div>
+        <div class="modal-meta">41 pessoas &nbsp;&middot;&nbsp; Atualizado em 28/05/2026</div>
+      </div>
+      <button class="modal-close" onclick="fecharModalTime()" aria-label="Fechar">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-time-body"></div>
+  </div>
+</div>
+
 <script>
+// ── DADOS DO TIME (gerado em 28/05/2026) ────────────────────────────────────
+var TIME_SEGMENTOS = [
+  {
+    segmento: "High touch - Novas",
+    pessoas: [
+      { nome: "Andreina Ferreira (And)", cargo: "Estagiário", lideranca: "Larissa Garcia" },
+      { nome: "Erick Andrade",           cargo: "Analista",        lideranca: "Larissa Garcia" },
+      { nome: "Gabriela Ribeiro",        cargo: "Estagiário", lideranca: "Larissa Garcia" },
+      { nome: "Julia Cordeiro Campos",   cargo: "Estagiário", lideranca: "Larissa Garcia" },
+      { nome: "Junior Gomes",            cargo: "Estagiário", lideranca: "Larissa Garcia" },
+      { nome: "Laura Gabriela Pagliuzo", cargo: "Estagiário", lideranca: "Larissa Garcia" },
+      { nome: "Maria Eduarda Carvalho",  cargo: "Analista",        lideranca: "Larissa Garcia" },
+      { nome: "Renata Brandão",     cargo: "Analista",        lideranca: "Larissa Garcia" }
+    ]
+  },
+  {
+    segmento: "High touch - Renovação",
+    pessoas: [
+      { nome: "Carla S. da Silva",         cargo: "Estagiário", lideranca: "Moreno Loss" },
+      { nome: "Indy Ferreira",             cargo: "Analista",        lideranca: "Moreno Loss" },
+      { nome: "Larissa Freitas Monteiro",  cargo: "Analista",        lideranca: "Moreno Loss" },
+      { nome: "Moreno Loss",               cargo: "Supervisor",      lideranca: "Larissa Garcia" },
+      { nome: "Nicole Cavalcante",         cargo: "Estagiário", lideranca: "Moreno Loss" },
+      { nome: "Shelry Solart",             cargo: "Estagiário", lideranca: "Moreno Loss" },
+      { nome: "Tatiana Portela",           cargo: "Analista",        lideranca: "Moreno Loss" },
+      { nome: "Thais Souza (Tata)",        cargo: "Estagiário", lideranca: "Não informado" },
+      { nome: "Thayná Bastos",        cargo: "Analista",        lideranca: "Moreno Loss" }
+    ]
+  },
+  {
+    segmento: "Medium touch - Renovação",
+    pessoas: [
+      { nome: "Ana Clara Peres dos Santos",      cargo: "Estagiário", lideranca: "Sara Penteado" },
+      { nome: "Ana Cláudia Santos de Almeida", cargo: "Estagiário", lideranca: "Sara Penteado" },
+      { nome: "Claudilene Santos Dias",          cargo: "Estagiário", lideranca: "Sara Penteado" },
+      { nome: "Giovanna Munhoz",                 cargo: "Estagiário", lideranca: "Sara Penteado" },
+      { nome: "Kaian Luís",                 cargo: "Estagiário", lideranca: "Sara Penteado" },
+      { nome: "Pâmela Miranda",             cargo: "Estagiário", lideranca: "Sara Penteado" },
+      { nome: "Stefany Soares Figueredo",        cargo: "Estagiário", lideranca: "Sara Penteado" },
+      { nome: "Vivian Cristina",                 cargo: "Estagiário", lideranca: "Sara Penteado" }
+    ]
+  },
+  {
+    segmento: "Premium touch",
+    pessoas: [
+      { nome: "Carine Leite",      cargo: "Coordenação", lideranca: "Mahane" },
+      { nome: "Carla Ferraz Gomes", cargo: "Analista",             lideranca: "Carine Leite" },
+      { nome: "Mariana Santana",   cargo: "Analista",              lideranca: "Carine Leite" },
+      { nome: "Talita Panassol",   cargo: "Analista",              lideranca: "Carine Leite" }
+    ]
+  },
+  {
+    segmento: "Premium touch 40+",
+    pessoas: [
+      { nome: "Julia Loubach", cargo: "Supervisor", lideranca: "Carine Leite" },
+      { nome: "Maria Elvira",  cargo: "Analista",   lideranca: "Carine Leite" }
+    ]
+  },
+  {
+    segmento: "México",
+    pessoas: [
+      { nome: "Alixibeth Cardiel",                    cargo: "Analista",  lideranca: "Paula Alejandra Valero Sánchez" },
+      { nome: "Daniela Yomaira Rojas Sánchez",   cargo: "Analista",  lideranca: "Paula Alejandra Valero Sánchez" },
+      { nome: "Nerbis Alejandra Carrero Hernandez",   cargo: "Analista",  lideranca: "Paula Alejandra Valero Sánchez" },
+      { nome: "Nioximar Gabriela Villael Mosqueda",   cargo: "Analista",  lideranca: "Paula Alejandra Valero Sánchez" },
+      { nome: "Paula Alejandra Valero Sánchez",  cargo: "Supervisor", lideranca: "Carine Leite" },
+      { nome: "Rúbia de Noronha Toledo",          cargo: "Analista",  lideranca: "Paula Alejandra Valero Sánchez" }
+    ]
+  },
+  {
+    segmento: "Redes",
+    pessoas: [
+      { nome: "Sarah Moura", cargo: "Analista", lideranca: "Carine Leite" }
+    ]
+  },
+  {
+    segmento: "SEDUC",
+    pessoas: [
+      { nome: "Jennifer dos Anjos", cargo: "Estagiário", lideranca: "Sara Penteado" }
+    ]
+  },
+  {
+    segmento: "Squad Confirmação",
+    pessoas: [
+      { nome: "Verônica Carvalho", cargo: "Estagiário", lideranca: "Julia Alves" }
+    ]
+  },
+  {
+    segmento: "Squad Reagendamento",
+    pessoas: [
+      { nome: "Ágatha de Moura Fernandes Cruz", cargo: "Estagiário", lideranca: "Julia Alves" },
+      { nome: "Mariana Mazzero",                    cargo: "Estagiário", lideranca: "Julia Alves" }
+    ]
+  }
+];
+
+// ── MODAL TIME ───────────────────────────────────────────────────────────────
+function abrirModalTime() {
+  var body = document.getElementById('modal-time-body');
+  if (!body.hasChildNodes()) {
+    body.innerHTML = renderTime();
+  }
+  document.getElementById('modal-time').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharModalTime() {
+  document.getElementById('modal-time').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// fechar ao clicar fora do modal
+document.getElementById('modal-time').addEventListener('click', function(e) {
+  if (e.target === this) fecharModalTime();
+});
+
+// fechar com ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') fecharModalTime();
+});
+
+function renderTime() {
+  var html = '';
+  TIME_SEGMENTOS.forEach(function(seg) {
+    html += '<div class="seg-block">';
+    html += '<div class="seg-header">';
+    html += '<span class="seg-name">' + esc(seg.segmento) + '</span>';
+    html += '<span class="seg-badge">' + seg.pessoas.length + ' pessoa' + (seg.pessoas.length !== 1 ? 's' : '') + '</span>';
+    html += '</div>';
+    html += '<div class="seg-cards">';
+    seg.pessoas.forEach(function(p) {
+      var cargoClass = 'cargo-' + p.cargo.replace(/\s+/g, '');
+      html += '<div class="pessoa-card">';
+      html += '<div class="pessoa-nome">' + esc(p.nome) + '</div>';
+      html += '<div class="pessoa-meta">';
+      html += '<span class="cargo-badge ' + cargoClass + '">' + esc(p.cargo) + '</span><br>';
+      html += esc(p.lideranca);
+      html += '</div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  return html;
+}
+
 // ── ESTADO ──────────────────────────────────────────────────────────────────
 var tipoSelecionado = null;
 
