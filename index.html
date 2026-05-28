@@ -78,6 +78,9 @@ body{
 }
 
 .card-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
   font-size:18px;
   font-weight:900;
   color:var(--purple);
@@ -285,27 +288,28 @@ input.invalid,select.invalid{border-color:var(--bad)}
 }
 .back-link:hover{color:#fff}
 
-/* btn ver time — chip no header */
+/* btn ver time — chip discreto ao lado do titulo do card */
 .btn-ver-time{
   display:inline-flex;
   align-items:center;
-  gap:5px;
-  padding:4px 10px 4px 7px;
-  background:rgba(255,255,255,.15);
-  color:#fff;
-  border:1px solid rgba(255,255,255,.3);
+  gap:4px;
+  padding:3px 8px 3px 6px;
+  background:var(--purple-soft);
+  color:var(--purple);
+  border:1px solid rgba(118,104,172,.25);
   border-radius:20px;
   font-family:'Montserrat',sans-serif;
   font-size:10px;
   font-weight:700;
   cursor:pointer;
   transition:background .15s,border-color .15s;
-  letter-spacing:.3px;
+  letter-spacing:.2px;
   white-space:nowrap;
   line-height:1;
+  vertical-align:middle;
 }
-.btn-ver-time:hover{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.5)}
-.btn-ver-time svg{flex-shrink:0;opacity:.9}
+.btn-ver-time:hover{background:rgba(118,104,172,.18);border-color:rgba(118,104,172,.45)}
+.btn-ver-time svg{flex-shrink:0}
 
 /* modal overlay */
 .modal-overlay{
@@ -457,22 +461,21 @@ input.invalid,select.invalid{border-color:var(--bad)}
     <div class="brand-name">Estante <span>M&aacute;gica</span></div>
     <div class="tagline-row">
       <span class="tagline">CS Ops &nbsp;&middot;&nbsp; Atualizar Time</span>
-      <button class="btn-ver-time" id="btn-ver-time" onclick="abrirModalTime()">
-        <svg width="13" height="13" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="8" cy="7" r="3.5" stroke="currentColor" stroke-width="1.7"/>
-          <path d="M1.5 17c0-3.314 2.91-6 6.5-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          <circle cx="14.5" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M10.5 17c0-2.485 1.79-4.5 4-4.5s4 2.015 4 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        Ver time
-      </button>
     </div>
   </div>
 
   <div class="card">
     <!-- FORMULARIO -->
     <div id="form-wrapper">
-      <div class="card-title">Registrar mudan&ccedil;a no time</div>
+      <div class="card-title">Registrar mudan&ccedil;a no time <button class="btn-ver-time" id="btn-ver-time" onclick="abrirModalTime()">
+          <svg width="11" height="11" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="8" cy="7" r="3.5" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M1.5 17c0-3.314 2.91-6 6.5-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            <circle cx="14.5" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M10.5 17c0-2.485 1.79-4.5 4-4.5s4 2.015 4 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Ver time
+        </button></div>
       <div class="card-sub">Registre entradas, sa&iacute;das e movimenta&ccedil;&otilde;es. Ao enviar, um e-mail pr&eacute;-preenchido ser&aacute; aberto para voc&ecirc; confirmar o envio.</div>
 
       <form id="main-form" novalidate>
