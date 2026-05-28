@@ -254,19 +254,6 @@ textarea{resize:vertical;min-height:80px}
 }
 input.invalid,select.invalid{border-color:var(--bad)}
 
-/* spinner */
-.spinner{
-  display:inline-block;
-  width:16px;height:16px;
-  border:2px solid rgba(255,255,255,.4);
-  border-top-color:#fff;
-  border-radius:50%;
-  animation:spin .6s linear infinite;
-  vertical-align:middle;
-  margin-right:8px;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-
 /* summary */
 .summary-box{
   background:var(--purple-soft);
@@ -313,7 +300,7 @@ input.invalid,select.invalid{border-color:var(--bad)}
     <!-- FORMULARIO -->
     <div id="form-wrapper">
       <div class="card-title">Registrar mudan&ccedil;a no time</div>
-      <div class="card-sub">Registre entradas, sa&iacute;das e movimenta&ccedil;&otilde;es. Os dados v&atilde;o direto para a planilha de controle.</div>
+      <div class="card-sub">Registre entradas, sa&iacute;das e movimenta&ccedil;&otilde;es. Ao enviar, um e-mail pr&eacute;-preenchido ser&aacute; aberto para voc&ecirc; confirmar o envio.</div>
 
       <form id="main-form" novalidate>
 
@@ -463,8 +450,8 @@ input.invalid,select.invalid{border-color:var(--bad)}
     <!-- SUCESSO -->
     <div class="success-box" id="success-box">
       <div class="success-icon">&#10003;</div>
-      <div class="success-title">Registrado com sucesso!</div>
-      <div class="success-sub" id="success-detail">A mudan&ccedil;a foi salva na planilha de controle.</div>
+      <div class="success-title">E-mail aberto!</div>
+      <div class="success-sub" id="success-detail">Confirme o envio no seu cliente de e-mail para registrar a mudan&ccedil;a.</div>
       <button class="btn-new" onclick="resetForm()">Registrar outra mudan&ccedil;a</button>
     </div>
   </div>
@@ -473,10 +460,6 @@ input.invalid,select.invalid{border-color:var(--bad)}
 </div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────────────
-// Substitua pela URL do seu Google Apps Script Web App depois de publicar.
-var APPS_SCRIPT_URL = "COLE_AQUI_A_URL_DO_APPS_SCRIPT";
-
 // ── ESTADO ──────────────────────────────────────────────────────────────────
 var tipoSelecionado = null;
 
@@ -646,39 +629,37 @@ document.getElementById('main-form').addEventListener('submit', function(e) {
   e.preventDefault();
   if (!validar()) return;
 
-  var btn = document.getElementById('btn-submit');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Enviando&hellip;';
+  var nome              = document.getElementById('nome').value.trim();
+  var segmento          = document.getElementById('segmento').value;
+  var segmentoAnterior  = document.getElementById('segmento-anterior').value;
+  var cargo             = document.getElementById('cargo').value;
+  var cargoAnterior     = document.getElementById('cargo-anterior').value;
+  var lideranca         = document.getElementById('lideranca').value;
+  var dataMudanca       = document.getElementById('data-mudanca').value.trim();
+  var obs               = document.getElementById('obs').value.trim();
 
-  var payload = {
-    tipo:              tipoSelecionado,
-    nome:              document.getElementById('nome').value.trim(),
-    segmento:          document.getElementById('segmento').value,
-    segmento_anterior: document.getElementById('segmento-anterior') ? document.getElementById('segmento-anterior').value : '',
-    cargo:             document.getElementById('cargo').value,
-    cargo_anterior:    document.getElementById('cargo-anterior') ? document.getElementById('cargo-anterior').value : '',
-    lideranca:         document.getElementById('lideranca').value,
-    data_mudanca:      document.getElementById('data-mudanca').value.trim(),
-    observacao:        document.getElementById('obs').value.trim(),
-    enviado_por:       navigator.userAgent,
-    timestamp:         new Date().toISOString()
-  };
+  var assunto = '[Time CS] ' + tipoSelecionado + ' — ' + nome;
 
-  fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    mode:   'no-cors',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(payload)
-  })
-  .then(function() {
-    // no-cors sempre retorna opaque — tratamos como sucesso
-    mostrarSucesso(payload);
-  })
-  .catch(function(err) {
-    btn.disabled = false;
-    btn.innerHTML = 'Registrar mudan&ccedil;a';
-    alert('Erro ao enviar. Verifique sua conex&atilde;o e tente novamente.\n\n' + err);
-  });
+  var linhas = [];
+  linhas.push('Tipo de mudança: ' + tipoSelecionado);
+  linhas.push('Nome: ' + nome);
+  if (segmento)         linhas.push('Segmento: ' + segmento);
+  if (segmentoAnterior) linhas.push('Segmento anterior: ' + segmentoAnterior);
+  if (cargo)            linhas.push('Cargo: ' + cargo);
+  if (cargoAnterior)    linhas.push('Cargo anterior: ' + cargoAnterior);
+  if (lideranca)        linhas.push('Liderança direta: ' + lideranca);
+  linhas.push('Data da mudança: ' + dataMudanca);
+  if (obs)              linhas.push('Observação: ' + obs);
+
+  var corpo = linhas.join('\n');
+
+  var mailto = 'mailto:bianca.moura@estantemagica.com.br'
+    + '?subject=' + encodeURIComponent(assunto)
+    + '&body='    + encodeURIComponent(corpo);
+
+  window.location.href = mailto;
+
+  mostrarSucesso({ tipo: tipoSelecionado, nome: nome, segmento: segmento, data_mudanca: dataMudanca });
 });
 
 function mostrarSucesso(payload) {
